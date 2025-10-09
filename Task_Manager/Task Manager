@@ -82,7 +82,7 @@ class Program
         ListTask();
         Console.Write("Qual tarefa deseja remover?");
         int index = int.Parse(Console.ReadLine()) - 1;
-        if (index <= 0 && index < tasks.Count)
+        if (index >= 0 && index < tasks.Count)
         {
             tasks.RemoveAt(index);
             Console.WriteLine("Tarefa Removida");
