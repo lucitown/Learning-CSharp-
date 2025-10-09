@@ -1,95 +1,189 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
+using System.IO;
 
-class Program
+namespace taskManager
 {
-    static List<string> tasks = new List<string>();
-
-    static void Main()
+    public class Task
     {
-        int option;
-        do
+        public string Description { get; set; }
+        public DateTime DateCreated { get; set; }
+        public DateTime? DateConcluded { get; set; }
+        public bool Concluded { get; set; }
+
+        public override string ToString()
         {
-            Console.WriteLine("Gerenciador de Tarefas");
-            Console.WriteLine("1. Adicionar Tarefa");
-            Console.WriteLine("2. Listar Tarefas");
-            Console.WriteLine("3. Conluir Tarefa");
-            Console.WriteLine("4. Remover Tarefa");
-            Console.WriteLine("0. Sair");
-            Console.Write("Escolha uma opção: ");
+            if (Concluded)
+                return $"{Description} (created: {DateCreated:dd/MM/yyyy}, | concluded: {DateConcluded:dd/MM/yyyy})";
+            else
+                return $"{Description} (created: {DateCreated:dd/MM/yyyy})";
+        }
+    }
 
-            option = int.Parse(Console.ReadLine());
 
-            switch (option)
+    class Program
+    {
+        static List<Task> tasks = new List<Task>();
+        const string filePath = "tasks.json";
+
+
+        static void Main()
+        {
+            LoadTasks();
+
+            bool running = true;
+            while (running)
             {
-                case 1:
-                    AddTask();
-                    break;
-                case 2:
-                    ListTask();
-                    break;
-                case 3:
-                    ConcludeTask();
-                    break;
-                case 4:
-                    RemoveTask();
-                    break;
-                case 0:
-                    Console.WriteLine("Saindo do Programa");
-                    break;
-                default:
-                    Console.WriteLine("Opção Inválida");
-                    break;
+                Console.Clear();
+                Console.WriteLine("Gerenciador de Tarefas");
+                Console.WriteLine("1. Adicionar Tarefa");
+                Console.WriteLine("2. Listar Tarefas Pendentes");
+                Console.WriteLine("3. Listar Tarefas Concluídas");
+                Console.WriteLine("4. Conluir Tarefa");
+                Console.WriteLine("5. Remover Tarefa");
+                Console.WriteLine("0. Salvar e Sair");
+                Console.Write("Escolha uma opção: ");
+
+                switch (Console.ReadLine())
+                {
+                    case "1":
+                        AddTask();
+                        break;
+                    case "2":
+                        ListTask(concluded: false);
+                        break;
+                    case "3":
+                        ListTask(concluded: true);
+                        break;
+                    case "4":
+                        ConcludeTask();
+                        break;
+                    case "5":
+                        RemoveTask();
+                        break;
+                    case "0":
+                        SaveTask();
+                        running = false;
+                        Console.WriteLine("Saindo do Programa");
+                        break;
+                    default:
+                        Console.WriteLine("Opção Inválida");
+                        break;
+                }
+
+                if (running)
+                {
+                    Console.WriteLine("Pressione qualquer tecla para continuar...");
+                    Console.ReadKey();
+                }
             }
-        } while (option != 0);
-    }
-
-    static void AddTask()
-    {
-        Console.Write("Digite a tarefa: "); 
-        string description = Console.ReadLine();    
-        tasks.Add(description); 
-        Console.WriteLine("Tarefa Adicionada");
-    }
-
-    static void ListTask()
-    {
-        Console.WriteLine("Tarefas:");
-        for (int i = 0; i < tasks.Count; i++)
-        {
-            Console.WriteLine($"{i + 1}.{tasks[i]}");
         }
-    }
 
-    static void ConcludeTask()
-    {
-        ListTask();
-        Console.Write("Qual tarefa deseja concluir?");
-        int index = int.Parse(Console.ReadLine()) - 1;
-        if (index >= 0 && index < tasks.Count)
+        static void AddTask()
         {
-            tasks[index] = "[Concluída] " + tasks[index];
-            Console.WriteLine("Tarefa Concluída");
-        } 
-        else
-        {
-            Console.WriteLine("Índice Inválido");
-        }
-    }
+            Console.Write("Digite a tarefa: ");
+            string description = Console.ReadLine();
 
-    static void RemoveTask()
-    {
-        ListTask();
-        Console.Write("Qual tarefa deseja remover?");
-        int index = int.Parse(Console.ReadLine()) - 1;
-        if (index >= 0 && index < tasks.Count)
-        {
-            tasks.RemoveAt(index);
-            Console.WriteLine("Tarefa Removida");
+            Task nova = new Task
+            {
+                Description = description,
+                DateCreated = DateTime.Now,
+                Concluded = false
+            };
+
+            tasks.Add(nova);
+            Console.WriteLine("Tarefa Adicionada");
         }
-        else
+
+        static void ListTask(bool concluded)
         {
-            Console.WriteLine("Índice Inválido");
+            Console.Clear();
+            Console.WriteLine(concluded ? "Tarefas Concluídas:" : "Tarefas Pendentes");
+
+            List<Task> filteredTasks = tasks.FindAll(t => t.Concluded == concluded);
+
+            if (filteredTasks.Count == 0)
+            {
+                Console.WriteLine("Nenhuma tarefa encontrada.");
+                return;            
+            }
+
+            filteredTasks.Sort((a, b) => a.DateCreated.CompareTo(b.DateCreated));
+            for (int i = 0; i < filteredTasks.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {filteredTasks[i]}");
+            }   
+        }
+        
+
+        static void ConcludeTask()
+        {
+            ListTask(false);
+            Console.Write("Qual tarefa deseja concluir?");
+            if (int.TryParse(Console.ReadLine(), out int index))
+            {
+                List<Task> pending = tasks.FindAll(t => !t.Concluded);
+
+                if (index > 0 && index <= pending.Count)
+                {
+                    Task task = pending[index - 1];
+                    task.Concluded = true;
+                    task.DateConcluded = DateTime.Now;
+                    Console.WriteLine("Tarefa Concluída");
+                }
+                else
+                {
+                    Console.WriteLine("Índice Inválido");   
+                }
+            }
+            else
+            {
+                Console.WriteLine("Entrada Inválida");  
+            }
+        }
+
+        static void RemoveTask()
+        {
+            ListTask(false);
+            Console.Write("Qual tarefa deseja remover?");
+            if (int.TryParse(Console.ReadLine(), out int index))
+            {
+                List<Task> pending = tasks.FindAll(t => !t.Concluded);
+
+                if (index > 0 && index <= pending.Count)
+                {
+                    tasks.Remove(pending[index - 1]);    
+                    Console.WriteLine("Tarefa Removida");
+                }
+                else
+                {
+                    Console.WriteLine("Índice Inválido");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Entrada Inválida");
+            }
+        }
+
+        static void SaveTask()
+        {
+            string json = JsonSerializer.Serialize(tasks, new JsonSerializerOptions {WriteIndented = true });
+            File.WriteAllText(filePath, json);  
+        }
+
+        static void LoadTasks()
+        {
+            if (File.Exists(filePath))
+            {
+                string json = File.ReadAllText(filePath);
+                tasks = JsonSerializer.Deserialize<List<Task>>(json);
+            }
+            else
+            {
+                tasks = new List<Task>();
+            }
         }
     }
 }
