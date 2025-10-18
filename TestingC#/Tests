@@ -1,0 +1,117 @@
+using System;
+
+namespace project
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            do
+            {
+                Console.Clear();
+                Console.WriteLine("Menu\n");
+                Console.WriteLine("1 - Teste A\n");
+                Console.WriteLine("2 - Teste B\n"); 
+                Console.WriteLine("3 - Teste C\n"); 
+                Console.WriteLine("0 - Sair\n");
+                Console.Write("Escolha uma opção: ");   
+                int alterna = int.Parse(Console.ReadLine() ?? ""  );
+                switch (alterna)
+                {
+                    case 1:
+                        Testes.TesteA();
+                        break;
+                    case 2:
+                        Testes.TesteB();
+                        break;
+                    default:
+                        Console.WriteLine("Opção inválida. Tente novamente.");
+                        break;
+                }
+            } while (true);
+        }       
+    }
+    class Testes
+    {
+        public static void TesteA()
+        {
+            do
+            {
+                Console.WriteLine("\nPorta da sorte \n");
+                Console.WriteLine("Escolha uma porta: 1, 2 ou 3\n");
+                Console.WriteLine("Para voltar ao menu principal, digite 0\n");
+                string uservalue = Console.ReadLine() ?? "";
+
+                if (uservalue == "0")
+                {
+                    break;
+                }
+                else if (uservalue == "1")
+                {
+                    Console.WriteLine("\nVocê ganhou uma pedra! XD");
+                }
+                else if (uservalue == "2")
+                {
+                    Console.WriteLine("\nVocê perdeu R$ 1000,00! :D ");
+                }
+                else if (uservalue == "3")
+                {
+                    Console.WriteLine("\nVocê achou uma dívida! c: ");
+                }
+                else
+                {
+                    Console.WriteLine("\nOpção inválida. Tente novamente.");
+                }
+            } while (true);
+        }
+
+        public static void TesteB()
+        {
+            double recursos = 1000;
+            Random rand = new Random(); 
+            List<string> message = new List<string>
+            {
+                "Adoro seus recursos!",
+                "Estou ficando rico $_$",
+                "Acho que vou comprar um carro novo *-*",
+                "Você gosta de perder né?",
+                "uau, você é insistente hein?",
+                
+            };
+            List<string> avaliablemessage = new List<string>();
+
+            Console.WriteLine("Bem Vindo ao Jogo da Perda!");
+            Console.WriteLine($"Regras: Você começa com {recursos} e a cada rodada você perde metade do que tem.");
+            Console.WriteLine("O jogo termina quando você não tiver mais nada e eu estiver com tudo XD");
+            Console.WriteLine("Como eu decido as regras, metade 31,25 é 0 X9");
+
+
+            while (recursos > 30)
+            {
+                Console.WriteLine($"\nVocê tem {recursos}.");
+                Console.WriteLine("Escolha um número entre 1 e 3");
+                string uservalue = Console.ReadLine() ?? ""; //evitar valores nulos
+                recursos /= 2;
+
+                if (uservalue == "1" || uservalue == "2" || uservalue == "3")
+                {
+                    string messages;
+                    if(avaliablemessage.Count > message.Count)
+                        avaliablemessage.Clear();
+                    do
+                    {
+                        int index = rand.Next(message.Count);
+                        messages = message[index];
+                    } while (avaliablemessage.Contains(messages));
+                    
+                    avaliablemessage.Add(messages);
+                    Console.WriteLine(messages);
+                }
+                else
+                {
+                    Console.WriteLine("Número inválido, mas você ainda perdeu metade XXXD.");
+                }
+            }
+        }
+    }
+}
