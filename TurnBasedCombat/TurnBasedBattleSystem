@@ -1,0 +1,287 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+
+namespace TurnBasedTest
+{
+    public class Character
+    {
+        // Properties
+        public string Name { get; set; }
+        public int Health { get; set; }
+        public int CurrentHealth { get; set; }
+        public int Mana { get; set; } //For habilities, but not used in this project
+        public int CurrentMana { get; set; }
+        public int Attack { get; set; }
+        public int Defense { get; set; }
+
+        // Constructor
+        public Character(string name, int health, int mana, int attack, int defense)
+        {
+            Name = name;
+            Health = health;
+            CurrentHealth = health;
+            Mana = mana;
+            CurrentMana = mana;
+            Attack = attack;
+            Defense = defense;
+        }
+
+        // Method to display character status
+        public void DisplayStatus()
+        {
+            Console.WriteLine($"{Name} - Health: {CurrentHealth}/{Health}, Mana: {CurrentMana}/{Mana}");
+        }
+
+        // Defending status
+        public bool IsDefending { get; private set; }
+
+        // Combat method to handle attacks
+        public int Combat(Character target)
+        {
+            int baseDamage = Attack;
+            if (target.IsDefending)
+            {
+                baseDamage = baseDamage - target.Defense; // Reduce damage if defending 
+                target.IsDefending = false; // Reset defending status after attack
+            }
+
+            if (baseDamage < 1) baseDamage = 1; // Minimum damage
+
+            target.CurrentHealth -= baseDamage;
+            if (target.CurrentHealth < 0) target.CurrentHealth = 0;
+
+            return baseDamage;
+        }
+
+        // Method to set defending status
+        public void Defend()
+        {
+            IsDefending = true;
+        }
+
+        // Method to check if character is alive
+        public bool IsAlive()
+        {
+            return CurrentHealth > 0;
+        }
+
+        // Method to reset character status for new battles
+        public void Reset()
+        {
+            CurrentHealth = Health;
+            CurrentMana = Mana;
+            IsDefending = false;
+        }
+    }
+
+    // Informations class to display game information
+    public class Info
+    {
+        public static void Informations()
+        {
+            Console.WriteLine("Informations:");
+            Console.WriteLine("This is a turn-based battle system demo.");
+            Console.WriteLine("You can create characters and engage in battles.");
+            Console.WriteLine("Press any key to return to the main menu.");
+            Console.ReadKey();
+        }
+    }
+
+    // Main Program class
+    class Program
+    {
+        static Character? player;
+
+        // Main method with switch + while loop for menu
+        static void Main()
+        {
+
+            bool exit = false;
+            while (!exit)
+            {
+                Console.WriteLine("Placeholder - rpg");
+                Console.WriteLine("Main Menu:");
+                Console.WriteLine("1. Start New Battle");
+                Console.WriteLine("2. Infomations");
+                Console.WriteLine("3. Exit");
+                Console.Write("Choose an option: ");
+                string option = Console.ReadLine();
+                switch (option)
+                {
+                    case "1":
+                        StartNewBattle();
+                        break;
+                    case "2":
+                        Info.Informations();
+                        break;
+                    case "3":
+                        exit = true;
+                        Console.WriteLine("Exiting the game. Goodbye!");
+                        break;
+                    default:
+                        Console.WriteLine("Invalid choice. Please try again.");
+                        break;
+                }
+                Console.Clear();
+            }
+        }
+
+        // Method to start a new battle
+        static void StartNewBattle()
+        {
+            // Create player character if not exists
+            if (player == null)
+            {
+                CreatePlayer();
+            }
+            else
+            {
+                player.Reset();
+            }
+
+            // Select a random enemy
+            Character enemy = EnemyPool.GetRandomEnemy();
+            Console.WriteLine($"A wild {enemy.Name} appears!");
+            Console.WriteLine("Battle Start!");
+
+            // Turn counter
+            int turnNumber = 1;
+
+            // Battle loop
+            while (player.IsAlive() && enemy.IsAlive())
+            {
+                Console.WriteLine($"\n-- Turn {turnNumber} --");
+
+                player.DisplayStatus();
+                enemy.DisplayStatus();
+
+                Console.WriteLine($"{player.Name}'s turn");
+                PlayerTurn(enemy);
+
+                if (!enemy.IsAlive())
+                {
+                    Console.WriteLine($"{enemy.Name} has been defeated!");
+                    break;
+                }
+
+                Console.WriteLine($"{enemy.Name}'s turn");
+                EnemyTurn(enemy);
+
+                if (!player.IsAlive())
+                {
+                    Console.WriteLine($"{player.Name} has been defeated!");
+                    break;
+                }
+
+                turnNumber++;
+                Console.WriteLine("Press any key to continue to the next turn...");
+                Console.ReadKey();
+                Console.Clear();
+
+            }
+
+            Console.WriteLine("Battle End!");
+            player.DisplayStatus();
+            enemy.DisplayStatus();
+
+            if (player.IsAlive())
+            {
+                Console.WriteLine("You won the battle!");
+            }
+            else
+            {
+                Console.WriteLine($"{enemy.Name} won the battle!");
+            }
+
+            Console.WriteLine("\nPress any key to continue...");
+            Console.ReadKey();
+        }
+
+        // Method to create player character
+        static void CreatePlayer()
+        {
+            Console.Write("Enter your character's name: ");
+            string? name = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                name = "Hero";
+            }
+
+            player = new Character(name, 100, 50, 10, 5);
+            Console.WriteLine($"Character {player.Name} created!");
+        }
+
+        // Method for player's turn
+        static void PlayerTurn(Character enemy)
+        {
+            Console.WriteLine("Choose an action:");
+            Console.WriteLine("1. Attack");
+            Console.WriteLine("2. Defend");
+            string? choice = Console.ReadLine();
+            switch (choice)
+            {
+                case "1":
+                    int damage = player.Combat(enemy);
+                    Console.WriteLine($"{player.Name} attacks {enemy.Name} for {damage} damage!");
+                    break;
+                case "2":
+                    Console.WriteLine($"{player.Name} defends and reduces incoming damage this turn!");
+                    player.Defend();
+                    break;
+                default:
+                    Console.WriteLine($"You hesitate and the {enemy.Name} acts first.");
+                    break;
+            }
+        }
+
+        // Method for enemy's turn
+        static void EnemyTurn(Character enemy)
+        {
+            Random random = new Random();
+            if (random.Next(100) < 70)
+            {
+                int damage = enemy.Combat(player);
+                Console.WriteLine($"{enemy.Name} attacks {player.Name} for {damage} damage!");
+            }
+            else
+            {
+                Console.WriteLine($"{enemy.Name} defends and reduces incoming damage this turn!");
+                enemy.Defend();
+            }
+        }
+    }
+
+    // EnemyPool class to manage enemy types
+    public static class EnemyPool
+    {
+        private static readonly List<Character> enemies = new()
+        {
+            new Character("Goblin", 50, 20, 8, 3),
+            new Character("Orc", 80, 10, 12, 6),
+            new Character("Tongo", 40, 30, 6, 2),
+            new Character("Wolf", 35, 0, 10, 1),
+            new Character("Bandit", 60, 25, 9, 4),
+            new Character("Very Cute Slime", 70, 15, 30, 8)
+        };
+
+        private static readonly Random random = new();
+
+        public static Character GetRandomEnemy()
+        {
+            int index = random.Next(enemies.Count);
+            return enemies[index];
+        }
+
+        public static void DisplayEnemyList()
+        {
+            Console.WriteLine("Enemy types");
+            for (int i = 0; i < enemies.Count; i++)
+            {
+                var enemy = enemies[i];
+                Console.WriteLine($"{i + 1}. {enemy.Name} - HP: {enemy.Health}, MP: {enemy.Mana}");
+            }
+        }
+    }
+}
