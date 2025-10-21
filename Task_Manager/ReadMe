@@ -4,7 +4,7 @@ A console-based task manager developed in C# as part of learning fundamental pro
 ## About This Project
 This project implements a simple task management system that demonstrates core C# programming principles. It was created to explore object-oriented programming, file handling, and the basic structure of a console application.
 
-## Key Features:
+## Key Features
   1. Task Management - Add, list, complete, and remove tasks
   2. Task Filtering - View pending and completed tasks separately
   3. Data Persistence - Automatic save/load using JSON files
