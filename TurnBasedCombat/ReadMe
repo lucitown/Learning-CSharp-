@@ -1,17 +1,17 @@
-Turn-Based RPG Battle System
-A turn-based battle system developed in CSharp as part of learning object-oriented programming and game development.
+## Turn-Based RPG Battle System
+A turn-based battle system developed in C# as part of learning object-oriented programming and game development.
 
-About the Project
-This project implements a turn-based combat system where players can create characters and battle against various types of enemies. Developed to demonstrate fundamental CSharp concepts and game programming principles.
+## About the Project
+This project implements a turn-based combat system where players can create characters and battle against various types of enemies. Developed to demonstrate fundamental C# concepts and game programming principles.
 
-Key Features:
-  1.  Turn-based combat system
+## Key Features
+  1. Turn-based combat system
   2. Enemy pool with different attributes
   3. Multiple actions (Attack, Defend)
   4. Basic AI for enemies
   5. Interactive console interface
 
-CSharp Concepts used:
+## C# Concepts used
   1. Object-Oriented Programming (Classes, Objects, Encapsulation)
   2. Control Flow (Loops, Conditionals, Switch Statements)
   3. Collections (List<T>, Arrays)
@@ -21,3 +21,13 @@ CSharp Concepts used:
   7. String Interpolation
   8. Random Number Generation
   9. Console I/O Operations
+
+## Learning Focus
+  1. Game State Management - Tracking battle progress and turns
+  2. Combat Systems - Implementing basic turn battle mechanics
+  3. AI Behavior - Creating simple enemy decision logic
+  4. Class Design - Structuring game entities and their interactions
+
+Language: C#
+Framework: .NET 8.0
+IDE: Visual Studio / VS Code
